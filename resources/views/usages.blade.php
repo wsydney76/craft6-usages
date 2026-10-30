@@ -20,8 +20,12 @@
 
         <b>{{ $relatedElement->title }}</b>
 
+        @if($relatedElement->bodyHtml)
+            <div class="mt-4">{!! $relatedElement->bodyHtml !!}</div>
+        @endif
+
         <div style="display: flex; justify-content: space-between; inline-size: 100%;" slot="footer">
-            <span></span>
+            <span>ID: {{ $relatedElement->element->id }} Status: {{ $relatedElement->element->status }}</span>
             <span>{{ $relatedElement->statusLabel }}</span>
         </div>
     </craft-card>

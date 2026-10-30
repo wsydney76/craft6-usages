@@ -13,5 +13,6 @@ class RelatedElementDTO
         public string $backgroundColor,
         public string $title,
         public string $statusLabel,
+        public string $bodyHtml = '',
     ) {}
 }

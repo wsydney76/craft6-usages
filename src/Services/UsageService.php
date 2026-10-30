@@ -3,8 +3,11 @@
 namespace wsydney76\usages\Services;
 
 use CraftCms\Cms\Asset\Elements\Asset;
+use CraftCms\Cms\Database\Table;
 use CraftCms\Cms\Element\Contracts\ElementInterface;
 use CraftCms\Cms\Entry\Elements\Entry;
+use CraftCms\Cms\Support\Facades\Elements;
+use Illuminate\Support\Facades\DB;
 use wsydney76\usages\Data\RelatedElementDTO;
 
 class UsageService
@@ -14,7 +17,14 @@ class UsageService
      */
     public static function getRelatedElementsForElement(ElementInterface $element): array
     {
-        $relatedElements = collect()
+        $relatedElements = DB::table(Table::RELATIONS)->where('targetId', $element->id)
+            ->get('sourceId')
+        ->map(static fn ($row) => Elements::getElementById($row->sourceId))
+        ->filter(fn($relatedElement) => $relatedElement !== null) // Filter out trashed or deleted elements
+        ->reject(fn($relatedElement) => $relatedElement->getIsRevision() || $relatedElement->getRootOwner()?->getIsRevision()); // Filter out non-canonical elements
+
+
+        /*$relatedElements = collect()
             ->merge(
                 Entry::find()
                     ->status(null)
@@ -28,7 +38,7 @@ class UsageService
                     ->status(null)
                     ->relatedTo(['targetElement' => $element])
                     ->all(),
-            );
+            );*/
 
         return $relatedElements
             ->map(static fn (ElementInterface $relatedElement): RelatedElementDTO => self::toDto($relatedElement))
@@ -38,38 +48,51 @@ class UsageService
     protected static function toDto(ElementInterface $element): RelatedElementDTO
     {
         if ($element instanceof Entry) {
-            $parts = ['<b>Entry</b>'];
-            $parts[] = $element->section ? ('Section: ' . $element->section->name) : 'Nested Element';
-            $parts[] = 'Type: ' . $element->type->name;
-
             $thumbHtml = null;
             $thumbSource = $element->type->getFieldLayout()->thumbSources[0] ?? null;
             if ($thumbSource) {
                 $thumbHtml = $element->type->getFieldLayout()->getThumbForElement($thumbSource, $element)?->getHtml(120);
             }
+            if ($element->section) {
+                $labelParts = ['<b>Entry</b>'];
+                $labelParts[] = 'Section: ' . $element->section->name;
+                $labelParts[] = 'Type: ' . $element->type->name;
+                $title = $element->title;
+                $statusLabel = self::getStatusLabel($element);
+                $bodyHtml = self::getBodyHtml($element);
+            } else {
+                $rootOwner = $element->getRootOwner();
+                $labelParts = ['<b>Nested Entry</b>'];
+                $labelParts[] = 'Type: ' . $element->type->name;
+                $title = $rootOwner->title . ($element->title ? ' - ' . $element->title : '');
+                $statusLabel = self::getStatusLabel($rootOwner);
+                $bodyHtml = self::getBodyHtml($rootOwner);
+            }
 
             return new RelatedElementDTO(
                 element: $element,
-                labelHtml: implode(' ', $parts),
+                labelHtml: implode(' ', $labelParts),
                 thumbnailHtml: $thumbHtml,
                 backgroundColor: sprintf('var(--color-%s-50)', $element->type->color->value),
-                title: $element->title ?? $element->getRootOwner()->title,
-                statusLabel: $element->getIsDraft() ? ('Draft ' . $element->getDraftName()) : 'Canonical',
+                title: $title,
+                statusLabel: $statusLabel,
+                bodyHtml: $bodyHtml,
             );
         }
 
         if ($element instanceof Asset) {
-            $parts = ['<b>Asset</b>'];
-            $parts[] = 'Volume: ' . $element->volume->name;
-            $parts[] = 'Folder Path: ' . $element->folderPath;
+            $labelParts = ['<b>Asset</b>'];
+            $labelParts[] = 'Volume: ' . $element->volume->name;
+            $labelParts[] = 'Folder Path: ' . $element->folderPath;
 
             return new RelatedElementDTO(
                 element: $element,
-                labelHtml: implode(' ', $parts),
+                labelHtml: implode(' ', $labelParts),
                 thumbnailHtml: $element->getImg(['width' => 120, 'height' => 120]),
                 backgroundColor: '',
                 title: $element->title ?? $element->getRootOwner()->title,
-                statusLabel: $element->getIsDraft() ? ('Draft ' . $element->getDraftName()) : 'Canonical',
+                statusLabel: self::getStatusLabel($element),
+                bodyHtml: self::getBodyHtml($element)
             );
         }
 
@@ -80,6 +103,36 @@ class UsageService
             backgroundColor: '',
             title: $element->title ?? $element->getRootOwner()->title,
             statusLabel: $element->getIsDraft() ? ('Draft ' . $element->getDraftName()) : 'Canonical',
+            bodyHtml: self::getBodyHtml($element)
         );
+    }
+
+    protected static function getStatusLabel(ElementInterface $element): string
+    {
+        if ($element->getIsDraft()) {
+
+            return $element->isProvisionalDraft ? 'Provisional draft' : 'Draft' ;
+        }
+
+
+        if ($element->getIsRevision()) {
+            return 'Revision ' . $element->revisionNum . ' ' . $element->revisionId;
+        }
+
+        return 'Canonical';
+    }
+
+    protected static function getBodyHtml(ElementInterface $element): string
+    {
+        if (!$element->getIsDraft()) {
+            return '';
+        }
+
+        $parts = [];
+        $parts[] = $element->getCanonicalId() == $element->id ? 'Unpublished' : 'Draft for ID: ' . $element->canonicalId;
+        $parts[] = 'Name: ' . $element->getDraftName();
+        $parts[] = 'Created by: ' . $element->getDraftCreator()?->fullName ?? 'Unknown';
+
+        return  implode('<br>', $parts);
     }
 }
