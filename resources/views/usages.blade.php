@@ -5,12 +5,19 @@
 
 
 @forelse($relatedElements as $relatedElement)
-    <craft-card style="margin: 12px 0; background-color: {{ $relatedElement->backgroundColor }}" thumb-alignment="end">
-        <span style="display: inline-flex; align-items: center; gap: 0.5em;" slot="label">{!! $relatedElement->labelHtml !!}</span>
+    <craft-card style="margin: 12px 0; background-color: {{ $relatedElement->backgroundColor }}" thumb-alignment="end" ondblclick="Craft.openSlideout('{{ $relatedElement->element->cpEditUrl }}')">
+        <span style="display: inline-flex; align-items: center; gap: 0.5em;"
+              slot="label">{!! $relatedElement->labelHtml !!}
+        </span>
 
         {{-- href has ugly red borders, avoid that by using script --}}
-        <craft-button onclick="window.location.href='{{ $relatedElement->element->cpEditUrl }}'" icon="pencil" variant="plain"
-                      size="small" aria-label="Edit" slot="actions"></craft-button>
+        <craft-button onclick="Craft.openSlideout('{{ $relatedElement->element->cpEditUrl }}')"
+                      icon="pencil"
+                      variant="plain"
+                      size="small"
+                      aria-label="Edit"
+                      slot="actions">
+        </craft-button>
 
         @if($relatedElement->thumbnailHtml)
             <div slot="thumbnail">
@@ -18,7 +25,9 @@
             </div>
         @endif
 
-        <b>{{ $relatedElement->title }}</b>
+        <craft-link>
+        <a href="{{ $relatedElement->cpEditUrl }}">{{ $relatedElement->title }}</a>
+        </craft-link>
 
         @if($relatedElement->bodyHtml)
             <div class="mt-4">{!! $relatedElement->bodyHtml !!}</div>

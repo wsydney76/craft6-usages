@@ -60,6 +60,7 @@ class UsageService
                 $title = $element->title;
                 $statusLabel = self::getStatusLabel($element);
                 $bodyHtml = self::getBodyHtml($element);
+                $cpEditurl = $element->cpEditUrl;
             } else {
                 $rootOwner = $element->getRootOwner();
                 $labelParts = ['<b>Nested Entry</b>'];
@@ -67,16 +68,18 @@ class UsageService
                 $title = $rootOwner->title . ($element->title ? ' - ' . $element->title : '');
                 $statusLabel = self::getStatusLabel($rootOwner);
                 $bodyHtml = self::getBodyHtml($rootOwner);
+                $cpEditurl = $rootOwner->cpEditUrl;
             }
 
             return new RelatedElementDTO(
                 element: $element,
                 labelHtml: implode(' ', $labelParts),
                 thumbnailHtml: $thumbHtml,
-                backgroundColor: sprintf('var(--color-%s-50)', $element->type->color->value),
+                backgroundColor: sprintf('var(--color-%s-50)', ($element->type->color->value ?? '')),
                 title: $title,
                 statusLabel: $statusLabel,
                 bodyHtml: $bodyHtml,
+                cpEditUrl: $cpEditurl,
             );
         }
 
@@ -92,7 +95,8 @@ class UsageService
                 backgroundColor: '',
                 title: $element->title ?? $element->getRootOwner()->title,
                 statusLabel: self::getStatusLabel($element),
-                bodyHtml: self::getBodyHtml($element)
+                bodyHtml: self::getBodyHtml($element),
+                cpEditUrl: $element->getCpEditUrl() ?? '',
             );
         }
 
@@ -103,7 +107,8 @@ class UsageService
             backgroundColor: '',
             title: $element->title ?? $element->getRootOwner()->title,
             statusLabel: $element->getIsDraft() ? ('Draft ' . $element->getDraftName()) : 'Canonical',
-            bodyHtml: self::getBodyHtml($element)
+            bodyHtml: self::getBodyHtml($element),
+            cpEditUrl: $element->getCpEditUrl() ?? '',
         );
     }
 

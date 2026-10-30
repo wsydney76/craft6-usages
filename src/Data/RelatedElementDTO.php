@@ -14,5 +14,6 @@ class RelatedElementDTO
         public string $title,
         public string $statusLabel,
         public string $bodyHtml = '',
+        public string $cpEditUrl = '',
     ) {}
 }
