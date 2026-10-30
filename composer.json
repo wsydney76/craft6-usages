@@ -1,0 +1,32 @@
+{
+  "name": "wsydney76/craft6-usages",
+  "description": "Display usages of elements in the Control Panel",
+  "type": "craft-plugin",
+  "require": {
+    "php": ">=8.5",
+    "craftcms/cms": "^6.0.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "wsydney76\\usages\\": "src/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "extra": {
+    "handle": "_craft6-usages",
+    "name": "Craft 6 Usages",
+    "developer": "wsydney76",
+    "class": "wsydney76\\usages\\Plugin"
+  },
+  "config": {
+    "sort-packages": true,
+    "platform": {
+      "php": "8.5"
+    },
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    }
+  }
+}
