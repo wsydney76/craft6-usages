@@ -44,8 +44,21 @@
                     <div class="mt-4">{!! $relatedElement->bodyHtml !!}</div>
                 @endif
 
-                <div style="display: flex; justify-content: space-between; inline-size: 100%;" slot="footer">
-                    <span>ID: {{ $relatedElement->element->id }} Status: {{ $relatedElement->element->status }}</span>
+                @php
+                    $fill = match($relatedElement->element->status) {
+                        'live' => 'emerald',
+                        'disabled' => 'gray',
+                        'pending' => 'amber',
+                        'expired' => 'red',
+                        default => 'slate',
+                    };
+                @endphp
+
+                <div style="display: flex; align-items: center; justify-content: space-between; inline-size: 100%;" slot="footer">
+                    <span>
+                        ID: {{ $relatedElement->element->id }}
+                        <craft-badge fill="{{ $fill }}">{{ ucfirst($relatedElement->element->status) }}</craft-badge>
+                    </span>
                     <span>{{ $relatedElement->statusLabel }}</span>
                 </div>
             </craft-card>
@@ -83,10 +96,11 @@
             <table class="data fullwidth">
                 <thead>
                 <tr>
-                    <th>Relation ID</th>
-                    <th>Source ID</th>
-                    <th>Target ID</th>
-                    <th>Field ID</th>
+                    <th>Relation</th>
+                    <th>Source</th>
+                    <th>Target</th>
+                    <th>Source Site</th>
+                    <th>Field</th>
                     <th>Sort Order</th>
                 </tr>
                 </thead>
@@ -96,6 +110,7 @@
                         <td>{{ $relation->id }}</td>
                         <td>{{ $relation->sourceId }}</td>
                         <td>{{ $relation->targetId }}</td>
+                        <td>{{ $relation->sourceSiteId }}</td>
                         <td>{{ $relation->fieldId }}</td>
                         <td>{{ $relation->sortOrder }}</td>
                     </tr>
