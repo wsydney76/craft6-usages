@@ -17,35 +17,20 @@ class UsageService
      */
     public static function getRelatedElementsForElement(ElementInterface $element): array
     {
-        $relatedElements = DB::table(Table::RELATIONS)->where('targetId', $element->id)
+        $relatedElements = DB::table(Table::RELATIONS)
+            ->where('targetId', $element->id)
             ->get('sourceId')
-        ->map(static fn ($row) => Elements::getElementById($row->sourceId))
-        ->filter(fn($relatedElement) => $relatedElement !== null)
-        ->reject(fn($relatedElement) => $relatedElement->getIsRevision() || $relatedElement->getRootOwner()?->getIsRevision()); // Filter out non-canonical elements
+            ->map(static fn($row) => Elements::getElementById($row->sourceId))
+            ->filter(fn($relatedElement) => $relatedElement !== null)
+            ->reject(fn($relatedElement) => $relatedElement->getIsRevision() || $relatedElement->getRootOwner()?->getIsRevision()); // Filter out non-canonical elements
 
         // TODO: Don't show revisions for now.
         //->reject(fn($relatedElement) =>  $relatedElement->getIsRevision()
         //    && $relatedElement->getCanonical()->getCurrentRevision()?->revisionId === $relatedElement->revisionId); // Filter out the current revision.
 
 
-        /*$relatedElements = collect()
-            ->merge(
-                Entry::find()
-                    ->status(null)
-                    ->drafts(null)
-                    ->provisionalDrafts(null)
-                    ->relatedTo(['targetElement' => $element])
-                    ->all(),
-            )
-            ->merge(
-                Asset::find()
-                    ->status(null)
-                    ->relatedTo(['targetElement' => $element])
-                    ->all(),
-            );*/
-
         return $relatedElements
-            ->map(static fn (ElementInterface $relatedElement): RelatedElementDTO => self::toDto($relatedElement))
+            ->map(static fn(ElementInterface $relatedElement): RelatedElementDTO => self::toDto($relatedElement))
             ->all();
     }
 
@@ -120,9 +105,8 @@ class UsageService
     {
         if ($element->getIsDraft()) {
 
-            return $element->isProvisionalDraft ? 'Provisional draft' : 'Draft' ;
+            return $element->isProvisionalDraft ? 'Provisional draft' : 'Draft';
         }
-
 
         if ($element->getIsRevision()) {
             return 'Revision ' . $element->revisionNum;
@@ -132,7 +116,7 @@ class UsageService
 
     protected static function getBodyHtml(ElementInterface $element): string
     {
-        if($element->getIsRevision()) {
+        if ($element->getIsRevision()) {
             return 'Revision Notes: ' . $element->revisionNotes;
         }
 
@@ -145,6 +129,6 @@ class UsageService
         $parts[] = 'Name: ' . $element->getDraftName();
         $parts[] = 'Created by: ' . $element->getDraftCreator()?->fullName ?? 'Unknown';
 
-        return  implode('<br>', $parts);
+        return implode('<br>', $parts);
     }
 }

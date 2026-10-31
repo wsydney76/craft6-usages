@@ -1,0 +1,63 @@
+@php
+    use wsydney76\usages\Data\RelatedElementDTO;
+    /** @var RelatedElementDTO $relatedElement */
+@endphp
+
+@props([
+    'relatedElements'
+])
+
+@forelse($relatedElements as $relatedElement)
+    <craft-card style="margin: 12px 0; background-color: {{ $relatedElement->backgroundColor }}"
+                thumb-alignment="end"
+                ondblclick="Craft.openSlideout('{{ $relatedElement->element->cpEditUrl }}')">
+
+        <span style="display: inline-flex; align-items: center; gap: 0.5em;"
+              slot="label">{!! $relatedElement->labelHtml !!}
+        </span>
+
+        {{-- href has ugly red borders, avoid that by using script --}}
+        <craft-button onclick="Craft.openSlideout('{{ $relatedElement->element->cpEditUrl }}')"
+                      icon="pencil"
+                      variant="plain"
+                      size="small"
+                      aria-label="Edit"
+                      slot="actions">
+        </craft-button>
+
+        @if($relatedElement->thumbnailHtml)
+            <div slot="thumbnail">
+                {!! $relatedElement->thumbnailHtml !!}
+            </div>
+        @endif
+
+        <craft-link>
+            <a href="{{ $relatedElement->cpEditUrl }}">{{ $relatedElement->title }}</a>
+        </craft-link>
+
+        @if($relatedElement->bodyHtml)
+            <div class="mt-4">{!! $relatedElement->bodyHtml !!}</div>
+        @endif
+
+        @php
+            $fill = match($relatedElement->element->status) {
+                'live' => 'emerald',
+                'disabled' => 'gray',
+                'pending' => 'amber',
+                'expired' => 'red',
+                default => 'slate',
+            };
+        @endphp
+
+        <div style="display: flex; align-items: center; justify-content: space-between; inline-size: 100%;"
+             slot="footer">
+                    <span>
+                        ID: {{ $relatedElement->element->id }}
+                        <craft-badge fill="{{ $fill }}">{{ ucfirst($relatedElement->element->status) }}</craft-badge>
+                    </span>
+            <span>{{ $relatedElement->statusLabel }}</span>
+        </div>
+    </craft-card>
+@empty
+    <p>No usages found.</p>
+@endforelse
