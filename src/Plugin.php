@@ -22,5 +22,4 @@ class Plugin extends BasePlugin
             $e->elements[] = new Usages();
         });
     }
-
 }
