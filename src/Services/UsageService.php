@@ -20,8 +20,12 @@ class UsageService
         $relatedElements = DB::table(Table::RELATIONS)->where('targetId', $element->id)
             ->get('sourceId')
         ->map(static fn ($row) => Elements::getElementById($row->sourceId))
-        ->filter(fn($relatedElement) => $relatedElement !== null) // Filter out trashed or deleted elements
+        ->filter(fn($relatedElement) => $relatedElement !== null)
         ->reject(fn($relatedElement) => $relatedElement->getIsRevision() || $relatedElement->getRootOwner()?->getIsRevision()); // Filter out non-canonical elements
+
+        // TODO: Don't show revisions for now.
+        //->reject(fn($relatedElement) =>  $relatedElement->getIsRevision()
+        //    && $relatedElement->getCanonical()->getCurrentRevision()?->revisionId === $relatedElement->revisionId); // Filter out the current revision.
 
 
         /*$relatedElements = collect()
@@ -121,14 +125,17 @@ class UsageService
 
 
         if ($element->getIsRevision()) {
-            return 'Revision ' . $element->revisionNum . ' ' . $element->revisionId;
+            return 'Revision ' . $element->revisionNum;
         }
-
         return 'Canonical';
     }
 
     protected static function getBodyHtml(ElementInterface $element): string
     {
+        if($element->getIsRevision()) {
+            return 'Revision Notes: ' . $element->revisionNotes;
+        }
+
         if (!$element->getIsDraft()) {
             return '';
         }

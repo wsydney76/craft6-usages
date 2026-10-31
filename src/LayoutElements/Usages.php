@@ -58,8 +58,9 @@ class Usages extends BaseUiElement
         }
 
         $html = template('_craft6-usages/usages', [
+            'element' => $context->element,
             'relatedElements' => UsageService::getRelatedElementsForElement($context->element),
-            'relationsRecordCount' => DB::table('relations')->where('targetId', $context->element->id)->count(),
+            'relations' => DB::table('relations')->where('targetId', $context->element->id)->get(),
         ]);
 
         return TemplateContent::make($this->uid, $html)->trusted(true)->width($this->width);
