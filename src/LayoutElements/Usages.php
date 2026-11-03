@@ -28,7 +28,7 @@ class Usages extends BaseUiElement
 
     protected function selectorLabel(): string
     {
-        return t('Usages Plugin');
+        return t('Usages');
     }
 
     protected function selectorIcon(): ?string
