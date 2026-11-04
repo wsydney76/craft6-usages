@@ -20,7 +20,8 @@ class UsageService
         $relatedElements = DB::table(Table::RELATIONS)
             ->where('targetId', $element->id)
             ->get('sourceId')
-            ->map(static fn($row) => Elements::getElementById($row->sourceId))
+            ->unique()
+            ->map(static fn($row) => Elements::getElementById($row->sourceId, siteId: $element->siteId))
             ->filter(fn($relatedElement) => $relatedElement !== null)
             ->reject(fn($relatedElement) => $relatedElement->getIsRevision() || $relatedElement->getRootOwner()?->getIsRevision()); // Filter out non-canonical elements
 
