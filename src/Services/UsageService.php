@@ -23,8 +23,8 @@ class UsageService
             ->unique()
             ->map(static fn($row) => Elements::getElementById($row->sourceId, siteId: $element->siteId))
             ->filter(fn($relatedElement) => $relatedElement !== null)
-            ->reject(fn($relatedElement) => $relatedElement->getIsRevision() || $relatedElement->getRootOwner()?->getIsRevision()); // Filter out non-canonical elements
-
+            ->reject(fn($relatedElement) => $relatedElement->getIsRevision() || $relatedElement->getRootOwner()?->getIsRevision()) // Filter out non-canonical elements
+            ->sortBy(fn($relatedElement) => $relatedElement->title ?? $relatedElement->getRootOwner()?->title);
         // TODO: Don't show revisions for now.
         //->reject(fn($relatedElement) =>  $relatedElement->getIsRevision()
         //    && $relatedElement->getCanonical()->getCurrentRevision()?->revisionId === $relatedElement->revisionId); // Filter out the current revision.
