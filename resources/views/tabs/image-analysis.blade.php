@@ -21,3 +21,14 @@
 
 <h3 class="mt-4 mb-2">Type</h3>
 <p>{{ $analysis->type->label() }}</p>
+
+<h3 class="mt-4 mb-2">Metadata</h3>
+
+@foreach($analysis->metadata ?? [] as $key => $value)
+    @if($value)
+        <div>
+            {{ $key }}:
+            {{ is_array($value) ? implode(', ', $value) : $value }}
+        </div>
+    @endif
+@endforeach
