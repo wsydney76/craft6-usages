@@ -47,7 +47,7 @@ class UsageService
                 $labelParts = ['<b>Entry</b>'];
                 $labelParts[] = 'Section: ' . $element->section->name;
                 $labelParts[] = 'Type: ' . $element->type->name;
-                $title = $element->title;
+                $title = $element->title ?? $element->section->name;
                 $statusLabel = self::getStatusLabel($element);
                 $bodyHtml = self::getBodyHtml($element);
                 $cpEditurl = $element->cpEditUrl;

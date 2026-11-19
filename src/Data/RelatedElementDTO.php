@@ -11,7 +11,7 @@ class RelatedElementDTO
         public string $labelHtml,
         public ?string $thumbnailHtml,
         public string $backgroundColor,
-        public string $title,
+        public ?string $title,
         public string $statusLabel,
         public string $bodyHtml = '',
         public string $cpEditUrl = '',
