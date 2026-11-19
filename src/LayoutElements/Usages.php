@@ -31,6 +31,9 @@ class Usages extends BaseUiElement
         return t('Usages');
     }
 
+    public ?string $uid = 'wsydney76-usages-panel';
+
+
     protected function selectorIcon(): ?string
     {
         return 'arrow-right-arrow-left';
