@@ -21,7 +21,7 @@
     @endif
 
     @if($element instanceof Entry)
-        {{ $element->section->name }}
+        {{ $element->section?->name ?? $element->type->name  }}
     @endif
 
     <strong>{{ $element->title }}</strong>
