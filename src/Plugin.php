@@ -21,13 +21,13 @@ class Plugin extends BasePlugin
 
     public function boot(): void
     {
-        Event::listen(function (FieldLayoutUIElementsResolving $e) {
+        Event::listen(function(FieldLayoutUIElementsResolving $e) {
             $e->elements[] = new Usages();
         });
 
 
-        Event::listen(function (FieldLayoutUiResolving $event): void {
-            if (! ($event->element instanceof Entry || $event->element instanceof Asset)) {
+        Event::listen(function(FieldLayoutUiResolving $event): void {
+            if (!(($event->element instanceof Entry && $event->element->section) || $event->element instanceof Asset)) {
                 return;
             }
 
@@ -44,6 +44,5 @@ class Plugin extends BasePlugin
                 );
             }
         });
-
     }
 }
